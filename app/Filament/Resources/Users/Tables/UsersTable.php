@@ -25,7 +25,7 @@ class UsersTable
                 ImageColumn::make('avatar')
                     ->label(false)  // tanpa judul kolom
                     ->circular()
-                    ->default(fn (User $record) =>
+                    ->defaultImageUrl(fn (User $record) =>
                         $record->getFilamentAvatarUrl()
                     )
                     ->width(40),

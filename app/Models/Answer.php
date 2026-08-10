@@ -3,21 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Answer extends Model
 {
-    use SoftDeletes;
+    protected $fillable = ['question_id', 'text', 'is_correct', 'is_active'];
 
-    protected $guarded = [];
-    protected $casts = [
-        'is_active' => 'boolean',
-        'is_correct' => 'boolean'
-    ];
-
-    //relasi inversi ke model Question
-    public function question(): BelongsTo
+    public function question()
     {
         return $this->belongsTo(Question::class);
     }

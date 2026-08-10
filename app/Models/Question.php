@@ -3,22 +3,20 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Question extends Model
 {
-    use \Illuminate\Database\Eloquent\SoftDeletes;
+    use SoftDeletes;
 
-    protected $guarded = [];
-    protected $casts = ['is_active' => 'boolean'];
+    protected $fillable = ['subject_id', 'payload', 'score', 'description', 'is_active'];
 
-    //relasi inverse ke model Subject
-    public function subject(): BelongsTo
+    public function subject()
     {
         return $this->belongsTo(Subject::class);
     }
 
-    //relasi 1 to many dengan model Answer
-    public function answers(): HasMany
+    public function answers()
     {
         return $this->hasMany(Answer::class);
     }

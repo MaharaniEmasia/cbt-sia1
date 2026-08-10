@@ -19,11 +19,15 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         User::factory()->create([
-            'name' => 'Arief',
-            'email' => 'nextpeopleone@gmail.com',
-            'username' => 'arief',
+            'name' => 'Maharani',
+            'email' => 'maharani1234@gmail.com',
+            'username' => 'admin',
             'is_staff' => true,
             'password' => Hash::make('rahasia'),
+        ]);
+
+        $this->call([
+            QuestionSeeder::class,
         ]);
     }
 }

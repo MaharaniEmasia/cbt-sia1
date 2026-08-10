@@ -9,11 +9,9 @@ class Subject extends Model
 {
     use SoftDeletes;
 
-    protected $guarded = [];
-    protected $casts = ['is_active' => 'boolean'];
+    protected $fillable = ['name', 'description', 'is_active'];
 
-    //relasi 1 to many dengan tabel questions
-    public function questions(): HasMany
+    public function questions()
     {
         return $this->hasMany(Question::class);
     }
