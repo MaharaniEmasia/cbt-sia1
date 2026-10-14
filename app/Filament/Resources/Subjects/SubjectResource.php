@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Subjects;
 
+use App\Filament\Resources\Questions\QuestionResource;
 use App\Filament\Resources\Subjects\Pages\ManageSubjects;
 use App\Models\Subject;
 use BackedEnum;
@@ -29,47 +30,53 @@ use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Laravel\SerializableClosure\Serializers\Native;
+use PhpParser\Node\Stmt\Label;
 use UnitEnum;
 
 class SubjectResource extends Resource
 {
     protected static ?string $model = Subject::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookmarkSquare;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookOpen;
+
+    protected static string|UnitEnum|null $navigationGroup = 'Pelajaran';
+
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'name';
-
-    protected static string|UnitEnum|null $navigationGroup = 'Basis Data';
 
     protected static ?string $modelLabel = 'Pelajaran';
 
     protected static ?string $navigationLabel = 'Data Pelajaran';
+
+    // ganti teks pada url (slug)
+    protected static ?string $slug = 'data-pelajaran';
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 TextInput::make('name')
-                ->label('Nama Pelajaran')
-                ->placeholder('Nama Mata Pelajaran')
-                ->columnSpanFull()
-                ->unique('subjects', 'name')
+                    ->label('Mata Pelajaran')
+                    ->placeholder('Nama Mata Pelajaran')
+                    ->columnSpanFull()
+                    ->unique('subjects', 'name')
                     ->required(),
                 Textarea::make('description')
                     ->label('Deskripsi')
-                    ->placeholder('Keterangan tambahan')
+                    ->placeholder('Keterangan Tambahan')
                     ->columnSpanFull(),
                 Toggle::make('is_active')
-                    ->label(label: 'Tersedia')
+                    ->label('Tersedia')
                     ->default(true)
                     ->inline(false)
                     ->live()
                     ->helperText(
-                        fn ($state) 
-                        => $state ? 'Pelajaran ini tersedia untuk diujiankan.'
-                        : 'Pelajaran ini tidak tersedia untuk diujiankan.'
-                        ),
+                        fn($state) => $state
+                            ? 'Pelajaran ini tersedia untuk diujiankan.'
+                            : 'Pelajaran ini tidak tersedia untuk diujiankan.'
+                    )
+                // ->helperText('Pelajaran ini tersedia untuk diujiankan.'),
             ]);
     }
 
@@ -88,15 +95,15 @@ class SubjectResource extends Resource
                     ->columnSpanFull(),
                 TextEntry::make('deleted_at')
                     ->label('Dihapus')
-                    ->dateTime('d M Y H:i:s')
-                    ->visible(fn (Subject $record): bool => $record->trashed()),
+                    ->dateTime('d F Y, H:i:s')
+                    ->visible(fn(Subject $record): bool => $record->trashed()),
                 TextEntry::make('created_at')
                     ->label('Dibuat')
-                    ->dateTime('d M Y H:i:s')
+                    ->dateTime('d F Y, H:i:s')
                     ->placeholder('-'),
                 TextEntry::make('updated_at')
-                    ->label('Diperbarui')
-                    ->dateTime('d M Y H:i:s')
+                    ->label('Diubah')
+                    ->dateTime('d F Y: H:i:s')
                     ->placeholder('-'),
             ]);
     }
@@ -111,23 +118,27 @@ class SubjectResource extends Resource
                     ->rowIndex()
                     ->width(40),
                 TextColumn::make('name')
-                    ->label('Nama Pelajaran')
+                    ->label('Pelajaran')
                     ->searchable(),
                 IconColumn::make('is_active')
                     ->label('Tersedia')
                     ->boolean(),
+                TextColumn::make('questions_count')
+                    ->label('Jumlah Soal')
+                    ->counts('questions')
+                    ->badge(),
                 TextColumn::make('deleted_at')
                     ->label('Dihapus')
                     ->dateTime('d/m/Y H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
-                    ->label('Dibuat')
+                    ->label('Ditambah')
                     ->dateTime('d/m/Y H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->label('Diperbarui')
+                    ->label('Diubah')
                     ->dateTime('d/m/Y H:i:s')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -135,7 +146,7 @@ class SubjectResource extends Resource
             ->filters([
                 TernaryFilter::make('is_active')
                     ->label('Status Pelajaran')
-                    ->placeholder('Pilih Salah satu status')
+                    ->placeholder('Pilih Salah Satu')
                     ->trueLabel('Tersedia')
                     ->falseLabel('Tidak Tersedia')
                     ->native(false),
@@ -143,7 +154,13 @@ class SubjectResource extends Resource
                     ->native(false),
             ])
             ->recordActions([
-                ViewAction::make(),
+                ViewAction::make()
+                    ->label('Lihat Soal')
+                    ->url(fn(Subject $record): string => QuestionResource::getUrl('index', [
+                        'filters' => [
+                            'subject_id' => ['value' => $record->id],
+                        ],
+                    ])),
                 EditAction::make(),
                 DeleteAction::make(),
                 ForceDeleteAction::make(),

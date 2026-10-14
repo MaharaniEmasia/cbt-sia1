@@ -12,12 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            //
-            $table->string('username')->nullable()->after('email');
+            $table->string('username')->unique()->after('email');
             $table->string('phone')->nullable()->after('username');
-            $table->string('is_staff')->default(false)->after('phone');
+            $table->boolean('is_staff')->default(false)->after('phone');
             $table->string('photo_path')->nullable()->after('is_staff');
-            // ubah kolom email menjadi nullable dan unique
+            // ubah kolom email menjadi nullable
             $table->string('email')->nullable()->change();
         });
     }
@@ -28,7 +27,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            //rollback coloumns ang ditambahkan
+            // rollback field yang ditambahkan
             $table->dropColumn('username', 'phone', 'is_staff');
         });
     }

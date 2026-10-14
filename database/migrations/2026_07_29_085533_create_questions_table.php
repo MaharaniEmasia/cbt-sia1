@@ -14,10 +14,8 @@ return new class extends Migration
     {
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
-            // foreign key untuk relasi ke tabel subjects
-            $table->foreignIdFor(Subject::class)
-                ->constrained()     // key constraint
-                ->cascadeOnDelete();
+            // foreign key untuk relasi table subject
+            $table->foreignIdFor(Subject::class)->constrained()->cascadeOnDelete();
             $table->longText('payload');
             // $table->char('correct_answer');
             $table->integer('score')->default(1);

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -23,46 +22,47 @@ class UserForm
                         // upload foto
                         FileUpload::make('photo_path')
                             ->label('Upload foto profil')
-                            ->hiddenLabel()
-                            ->image()   // khusus upload gambar
-                            ->avatar()  // resize otomatis dan circular
-                            ->disk('public')    // partisi storage
-                            ->directory('user-photos')  // nama folder
-                            ->maxSize(1024) // ukuran max 1MB
+                            ->image()
+                            ->avatar()
+                            ->disk('public')
+                            ->directory('user-photos')
+                            ->visibility('public') // Tambahkan ini agar file dapat diakses publik
+                            ->preserveFilenames(false)
+                            ->maxSize(1024)
                             ->imageEditor()
                             ->columnSpanFull()
                             ->alignCenter(),
+
                         TextInput::make('name')
                             ->label('Nama lengkap')
                             ->required()
                             ->columnSpanFull(),
+
                         TextInput::make('email')
                             ->label('Alamat email')
-                            ->unique('users', 'email')
-                            ->prefix('@')
                             ->email(),
+
                         TextInput::make('username')
-                            ->label('Login username')
-                            // harus unique dengan user yang lain
+                            ->label('Login Username')
                             ->unique(
                                 table: 'users',
                                 column: 'username',
+                                ignoreRecord: true, // Tambahkan ini agar tidak error saat edit user
                             )
-                            ->placeholder('Digunakan untuk login akun')
-                            ->helperText('Username harus unik.')
                             ->required(),
+
                         TextInput::make('phone')
-                            ->label('Nomor telepon')
-                            // ->prefixIcon('heroicon-o-phone')
+                            ->label('Nomor Telepon')
                             ->prefixIcon(Heroicon::OutlinedPhone)
                             ->tel(),
 
                         TextInput::make('password')
-                            // disembunyikan di halaman edit
                             ->hiddenOn('edit')
-                            // tampilkan password
                             ->revealable()
                             ->password()
+                            ->required(fn(string $operation): bool => $operation === 'create'), // Wajib hanya saat buat baru
+
+                        Toggle::make('is_staff')
                             ->required(),
                     ]),
             ]);
